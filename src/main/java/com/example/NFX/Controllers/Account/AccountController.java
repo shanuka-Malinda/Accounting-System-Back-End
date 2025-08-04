@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("acc")
-@CrossOrigin
+@CrossOrigin("*")
 public class AccountController {
     private final AccountService accountService;
 

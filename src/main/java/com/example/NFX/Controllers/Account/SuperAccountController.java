@@ -7,6 +7,8 @@ import com.example.NFX.Utility.CommonResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("sup")
 @CrossOrigin
@@ -18,8 +20,11 @@ public class SuperAccountController {
         this.superAccountService = superAccountService;
     }
 
+    @PostMapping("create-journal-single")
+    public CommonResponse saveSingleEntry(@RequestBody SuperAccountDto superAccountDto){
+       return superAccountService.saveSingleEntry(superAccountDto); }
     @PostMapping("create-journal")
-    public CommonResponse saveDoubleEntry(@RequestBody SuperAccountDto superAccountDto){
-        return superAccountService.saveDoubleEntry(superAccountDto);
+    public CommonResponse saveDoubleEntry(@RequestBody List<SuperAccountDto> journalEntries) {
+       return superAccountService.saveDoubleEntry(journalEntries);
     }
 }

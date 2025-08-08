@@ -7,7 +7,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.time.LocalDateTime;
+
 
 @Entity
 @Table(name = "supper_account")
@@ -23,7 +25,7 @@ public class SuperAccountEntity {
     private String description;
     private BigDecimal amount;
     private int creditDebit; //cr=1,dr=0
-    private String date;
+    private Date date;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

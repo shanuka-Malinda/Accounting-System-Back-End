@@ -3,6 +3,8 @@ package com.example.NFX.Services.Account.Impl;
 import com.example.NFX.Constant.CommonMsg;
 import com.example.NFX.Constant.CommonStatus;
 import com.example.NFX.Dtos.Account.AccountDto.AccountRequestDto;
+import com.example.NFX.Dtos.Account.AccountDto.AccountResponseDto;
+import com.example.NFX.Dtos.Account.SuperAccountDto.DateFilterRequest;
 import com.example.NFX.Dtos.Account.SuperAccountDto.SuperAccountDto;
 import com.example.NFX.Entity.Account.AccountEntity;
 import com.example.NFX.Entity.Account.SuperAccountEntity;
@@ -11,12 +13,16 @@ import com.example.NFX.Services.Account.SuperAccountService;
 import com.example.NFX.Utility.CommonResponse;
 import com.example.NFX.Utility.CommonValidation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SuperAccountServiceImpl implements SuperAccountService {
@@ -51,6 +57,101 @@ public class SuperAccountServiceImpl implements SuperAccountService {
         return commonResponse;
     }
 
+
+    @Override
+    public CommonResponse getAll() {
+        CommonResponse commonResponse = new CommonResponse();
+        try {
+            List<SuperAccountDto> superAccountDtoList = superAccountRepo.findAll()
+                    .stream()
+                    .filter(superAccountEntity -> superAccountEntity.getCommonStatus() == CommonStatus.ACTIVE)
+                    .map(this::entityCastToDto)
+                    .toList();
+            commonResponse.setStatus(true);
+            commonResponse.setPayload(Collections.singletonList(superAccountDtoList)); // Direct list instead of singleton
+        } catch (DataAccessException e) {
+            commonResponse.setStatus(false);
+            commonResponse.setErrorMessages(List.of("Database error while retrieving account: " + e.getMessage()));
+        } catch (Exception e) {
+
+            commonResponse.setStatus(false);
+            commonResponse.setErrorMessages(List.of("Unexpected error while retrieving account: " + e.getMessage()));
+        }
+        return commonResponse;
+    }
+
+    @Override
+    public CommonResponse getAll(DateFilterRequest dateFilterRequest) {
+        Date startDate=dateFilterRequest.getStartDate();
+        Date endDate=dateFilterRequest.getEndDate();
+        CommonResponse commonResponse = new CommonResponse();
+        try {
+            List<SuperAccountDto> superAccountDtoList = superAccountRepo.findAll()
+                    .stream()
+                    .filter(entity -> entity.getCommonStatus() == CommonStatus.ACTIVE)
+                    .filter(entity -> {
+                        Date entityDate = entity.getDate();
+                        if (entityDate == null) return false;
+
+                        boolean afterStart = startDate == null || !entityDate.before(startDate);
+                        boolean beforeEnd = endDate == null || !entityDate.after(endDate);
+
+                        return afterStart && beforeEnd;
+                    })
+                    .map(this::entityCastToDto)
+                    .toList();
+
+            commonResponse.setStatus(true);
+            commonResponse.setPayload(Collections.singletonList(superAccountDtoList));
+
+
+        } catch (DataAccessException e) {
+            commonResponse.setStatus(false);
+            commonResponse.setErrorMessages(List.of("Database error while retrieving accounts: " + e.getMessage()));
+        } catch (Exception e) {
+            commonResponse.setStatus(false);
+            commonResponse.setErrorMessages(List.of("Unexpected error while retrieving accounts: " + e.getMessage()));
+        }
+        return commonResponse;
+    }
+
+    @Override
+    public CommonResponse getAllWithAcc(DateFilterRequest dateFilterRequest) {
+        Date startDate = dateFilterRequest.getStartDate();
+        Date endDate = dateFilterRequest.getEndDate();
+        String accNo = dateFilterRequest.getAccNo();
+        System.out.println(dateFilterRequest.getAccNo());
+        CommonResponse commonResponse = new CommonResponse();
+
+        try {
+            List<SuperAccountDto> superAccountDtoList = superAccountRepo.findAll()
+                    .stream()
+                    .filter(entity -> entity.getCommonStatus() == CommonStatus.ACTIVE)
+                    .filter(entity -> accNo != null && accNo.equals(entity.getAccNo())) // Use equals for string comparison
+                    .filter(entity -> {
+                        Date entityDate = entity.getDate();
+                        if (entityDate == null) return false;
+
+                        boolean afterStart = startDate == null || !entityDate.before(startDate);
+                        boolean beforeEnd = endDate == null || !entityDate.after(endDate);
+
+                        return afterStart && beforeEnd;
+                    })
+                    .map(this::entityCastToDto)
+                    .toList();
+
+            commonResponse.setStatus(true);
+            commonResponse.setPayload(Collections.singletonList(superAccountDtoList));
+
+        } catch (DataAccessException e) {
+            commonResponse.setStatus(false);
+            commonResponse.setErrorMessages(List.of("Database error while retrieving accounts: " + e.getMessage()));
+        } catch (Exception e) {
+            commonResponse.setStatus(false);
+            commonResponse.setErrorMessages(List.of("Unexpected error while retrieving accounts: " + e.getMessage()));
+        }
+        return commonResponse;
+    }
 
 
     @Override
@@ -116,15 +217,15 @@ public class SuperAccountServiceImpl implements SuperAccountService {
             // Set reference and date from first entry for consistency check
             if (i == 0) {
                 reference = dto.getReference();
-                date = dto.getDate();
+                date = String.valueOf(dto.getDate());
             } else {
                 // Check if reference and date are consistent across entries
                 if (!reference.equals(dto.getReference())) {
                     validationList.add("All entries must have the same reference number");
                 }
-                if (!date.equals(dto.getDate())) {
-                    validationList.add("All entries must have the same date");
-                }
+//                if (!date.equals(dto.getDate())) {
+//                    validationList.add("All entries must have the same date");
+//                }
             }
 
             // Calculate totals
@@ -156,7 +257,7 @@ public class SuperAccountServiceImpl implements SuperAccountService {
         if (!CommonValidation.isNotNullOrEmpty(superAccountDto.getReference())) {
             validationList.add(prefix + CommonMsg.EMPTY_REFERENCE);
         }
-        if (!CommonValidation.isNotNullOrEmpty(superAccountDto.getDate())) {
+        if (!CommonValidation.isNotNullOrEmpty(String.valueOf(superAccountDto.getDate()))) {
             validationList.add(prefix + CommonMsg.EMPTY_INVOICE_DATE);
         }
         if (!CommonValidation.isNotNullOrEmpty(superAccountDto.getDescription())) {
@@ -182,7 +283,7 @@ public class SuperAccountServiceImpl implements SuperAccountService {
             validationList.add(CommonMsg.EMPTY_REFERENCE);
         }
 
-        if(!CommonValidation.isNotNullOrEmpty(superAccountDto.getDate())){
+        if(!CommonValidation.isNotNullOrEmpty(String.valueOf(superAccountDto.getDate()))){
             validationList.add(CommonMsg.EMPTY_INVOICE_DATE);
         }
         if(!CommonValidation.isNotNullOrEmpty(superAccountDto.getDescription())){
@@ -198,6 +299,9 @@ public class SuperAccountServiceImpl implements SuperAccountService {
 
         return validationList;
     }
+
+
+
     // Keep the existing dtoCastToEntity method as is
     private SuperAccountEntity dtoCastToEntity(SuperAccountDto superAccountDto) {
         SuperAccountEntity superAccountEntity = new SuperAccountEntity();

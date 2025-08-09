@@ -168,6 +168,8 @@ public class AccountCategoryServiceImpl implements AccountCategoryService {
                         AccountResponseDto accountResponseDto = new AccountResponseDto();
                         accountResponseDto.setAccNo(account.getAccNo());
                         accountResponseDto.setName(account.getName());
+                        accountResponseDto.setDescription(account.getDescription());
+                        accountResponseDto.setIsCurrent(account.getIsCurrent());
                         accountResponseDto.setOpeningBalance(account.getOpeningBalance());
                         accountResponseDto.setCurrentBalance(account.getCurrentBalance());
                         accountResponseDto.setCreditLimit(account.getCreditLimit());

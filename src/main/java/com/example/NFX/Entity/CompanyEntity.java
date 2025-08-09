@@ -1,39 +1,32 @@
-package com.example.NFX.Entity.Account;
+package com.example.NFX.Entity;
 
+import ch.qos.logback.core.util.Loader;
 import com.example.NFX.Constant.CommonStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "account")
+@Table(name = "company")
 @Data
-public class AccountEntity {
+public class CompanyEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    private String accNo;
-
-    private String catCode;
-
-    private String isCurrent;
-
-    @Column(name = "name", length = 100)
     private String name;
-
-    private String description;
-    private String createdBy;
-    private String updatedBy;
-
-    private BigDecimal openingBalance;
-    private BigDecimal currentBalance;
-    private BigDecimal creditLimit;
+    private String address;
+    private String email;
+    private String tel;
+    private String fax;
+    private String web;
+    private String regNo;
+    private String logo;
+    private String startedDate;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -46,7 +39,4 @@ public class AccountEntity {
     @Column(name = "common_status")
     private CommonStatus commonStatus;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private AccountCategoryEntity accountCategory;
 }

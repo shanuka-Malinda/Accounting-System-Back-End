@@ -15,9 +15,12 @@ public class AccountResponseDto {
     private String accNo;
     private String name;
     private String catCode;
+    private String description;
+    private String isCurrent;
     private BigDecimal openingBalance;
     private BigDecimal currentBalance;
     private BigDecimal CreditLimit;
+
     private String createdBy;
     private String updatedBy;
     private LocalDateTime createdAt;

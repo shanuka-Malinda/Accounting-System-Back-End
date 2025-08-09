@@ -87,9 +87,18 @@ public class AccountServiceImpl implements AccountService {
         accountEntity.setName(accountRequestDto.getName());
         accountEntity.setDescription(accountRequestDto.getDescription());
 
-        accountEntity.setCreditLimit(accountRequestDto.getCreditLimit());
-        accountEntity.setOpeningBalance(accountRequestDto.getOpeningBalance());
-        accountEntity.setCurrentBalance(accountRequestDto.getCurrentBalance());
+
+        System.out.println(accountRequestDto.getIsCurrent());
+        if (accountRequestDto.getIsCurrent().isEmpty()) {
+            accountEntity.setIsCurrent("3");
+        } else {
+            accountEntity.setIsCurrent(accountRequestDto.getIsCurrent());
+        }
+
+
+//        accountEntity.setCreditLimit(accountRequestDto.getCreditLimit());
+//        accountEntity.setOpeningBalance(accountRequestDto.getOpeningBalance());
+//        accountEntity.setCurrentBalance(accountRequestDto.getCurrentBalance());
 
         accountEntity.setCreatedBy(accountRequestDto.getCreatedBy());
         accountEntity.setUpdatedBy(accountRequestDto.getUpdatedBy());
@@ -106,7 +115,9 @@ public class AccountServiceImpl implements AccountService {
         accountResponseDto.setId(accountEntity.getId());
         accountResponseDto.setCatCode(accountEntity.getCatCode());
         accountResponseDto.setAccNo(accountEntity.getAccNo());
+        accountResponseDto.setDescription(accountEntity.getDescription());
         accountResponseDto.setName(accountEntity.getName());
+        accountResponseDto.setIsCurrent(accountResponseDto.getIsCurrent());
         accountResponseDto.setCurrentBalance(accountEntity.getCurrentBalance());
         accountResponseDto.setOpeningBalance(accountEntity.getOpeningBalance());
         accountResponseDto.setCreditLimit(accountEntity.getCreditLimit());

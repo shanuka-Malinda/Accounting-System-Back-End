@@ -19,9 +19,10 @@ public class SuperAccountEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
-
+    private String ledgerCode;
     private String reference;
     private String accNo;
+    private String catCode;
     private String description;
     private BigDecimal amount;
     private int creditDebit; //cr=1,dr=0

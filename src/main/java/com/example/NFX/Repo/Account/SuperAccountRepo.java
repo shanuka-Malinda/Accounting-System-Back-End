@@ -14,5 +14,7 @@ import java.util.List;
 @Repository
 public interface SuperAccountRepo extends JpaRepository<SuperAccountEntity,Long> {
 
+    @Query("SELECT MAX(s.ledgerCode) FROM SuperAccountEntity s")
+    String findMaxLedgerCode();
 
 }

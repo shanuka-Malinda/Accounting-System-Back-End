@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 public class AccountRequestDto {
     private String name;
     private String description;
+    private String isCurrent;
     private String createdBy;
     private String updatedBy;
     private String catCode;

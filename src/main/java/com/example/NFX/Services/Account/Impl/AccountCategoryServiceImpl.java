@@ -1,5 +1,6 @@
 package com.example.NFX.Services.Account.Impl;
 
+import com.example.NFX.Constant.AccountCode;
 import com.example.NFX.Constant.CommonMsg;
 import com.example.NFX.Constant.CommonStatus;
 import com.example.NFX.Dtos.Account.AccountCategoryDto.AccountCategoryRequestDto;
@@ -43,11 +44,11 @@ public class AccountCategoryServiceImpl implements AccountCategoryService {
 
     private void initializeDefaultAccountCategories() {
         Object[][] categoryData = {
-                {"Assets", "10"},
-                {"Liabilities", "20"},
-                {"Equity", "30"},
-                {"Revenue", "40"},
-                {"Expenses", "50"}
+                {"Assets", AccountCode.ASSETS.getCode()},
+                {"Liabilities", AccountCode.LIABILITIES.getCode()},
+                {"Equity", AccountCode.EQUITY.getCode()},
+                {"Revenue", AccountCode.REVENUE.getCode()},
+                {"Expenses", AccountCode.EXPENSES.getCode()}
         };
 
         for (Object[] category : categoryData) {

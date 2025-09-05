@@ -3,6 +3,7 @@ package com.example.NFX.Repo.Account;
 import com.example.NFX.Entity.Account.AccountEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -21,5 +22,6 @@ public interface AccountRepo extends JpaRepository<AccountEntity,Long> {
 
     boolean existsByName(String name);
 
-//    boolean existsName(String name);
+    @Query("SELECT MAX(a.accNo) FROM AccountEntity a WHERE a.accNo LIKE CONCAT(:prefix, '%')")
+    Optional<String> findMaxAccountNumberByPrefix(@Param("prefix") String prefix);
 }

@@ -1,5 +1,6 @@
 package com.example.NFX.Services.Account.Impl;
 
+import com.example.NFX.Constant.AccountCode;
 import com.example.NFX.Constant.CommonMsg;
 import com.example.NFX.Constant.CommonStatus;
 import com.example.NFX.Dtos.Account.AccountCategoryDto.AccountCategoryResponseDto;
@@ -58,12 +59,86 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public CommonResponse createSupCus(AccountRequestDto accountRequestDto) {
+        CommonResponse commonResponse= new CommonResponse();
+        try {
+            List<String> validationList= AccountValidation(accountRequestDto);
+            if (!validationList.isEmpty()){
+                commonResponse.setStatus(false);
+                commonResponse.setErrorMessages(validationList);
+                return commonResponse;
+            }
+            AccountEntity accountEntity= dtoCastToEntitySupCus(accountRequestDto);
+            AccountEntity saveAccountEntity= accountRepo.save(accountEntity);
+
+            commonResponse.setStatus(true);
+            commonResponse.setPayload(Collections.singletonList("SuccessFully saved"));
+        }catch (Exception e){
+            e.printStackTrace();
+            commonResponse.setStatus(false);
+            commonResponse.setErrorMessages(Collections.singletonList("Error Occurred While Account Saving"));
+
+        }
+        return commonResponse;
+    }
+
+
+
+    @Override
     public CommonResponse getAll() {
         CommonResponse commonResponse = new CommonResponse();
         try {
             List<AccountResponseDto> accountResponseDtoList = accountRepo.findAll()
                     .stream()
                     .filter(accountEntity -> accountEntity.getCommonStatus() == CommonStatus.ACTIVE)
+                    .map(this::entityCastToDto)
+                    .toList();
+            commonResponse.setStatus(true);
+            commonResponse.setPayload(Collections.singletonList(accountResponseDtoList)); // Direct list instead of singleton
+        } catch (DataAccessException e) {
+            commonResponse.setStatus(false);
+            commonResponse.setErrorMessages(List.of("Database error while retrieving account: " + e.getMessage()));
+        } catch (Exception e) {
+
+            commonResponse.setStatus(false);
+            commonResponse.setErrorMessages(List.of("Unexpected error while retrieving account: " + e.getMessage()));
+        }
+        return commonResponse;
+    }
+
+    @Override
+    public CommonResponse getCus() {
+        CommonResponse commonResponse = new CommonResponse();
+        try {
+            List<AccountResponseDto> accountResponseDtoList = accountRepo.findAll()
+                    .stream()
+                    .filter(accountEntity -> {
+                        return accountEntity.getCommonStatus() == CommonStatus.ACTIVE && accountEntity.getCatCode().equals("11");
+                    })
+                    .map(this::entityCastToDto)
+                    .toList();
+            commonResponse.setStatus(true);
+            commonResponse.setPayload(Collections.singletonList(accountResponseDtoList)); // Direct list instead of singleton
+        } catch (DataAccessException e) {
+            commonResponse.setStatus(false);
+            commonResponse.setErrorMessages(List.of("Database error while retrieving account: " + e.getMessage()));
+        } catch (Exception e) {
+
+            commonResponse.setStatus(false);
+            commonResponse.setErrorMessages(List.of("Unexpected error while retrieving account: " + e.getMessage()));
+        }
+        return commonResponse;
+    }
+
+    @Override
+    public CommonResponse getSup() {
+        CommonResponse commonResponse = new CommonResponse();
+        try {
+            List<AccountResponseDto> accountResponseDtoList = accountRepo.findAll()
+                    .stream()
+                    .filter(accountEntity -> {
+                        return accountEntity.getCommonStatus() == CommonStatus.ACTIVE && accountEntity.getCatCode().equals("22");
+                    })
                     .map(this::entityCastToDto)
                     .toList();
             commonResponse.setStatus(true);
@@ -87,10 +162,8 @@ public class AccountServiceImpl implements AccountService {
         accountEntity.setName(accountRequestDto.getName());
         accountEntity.setDescription(accountRequestDto.getDescription());
 
-
-        System.out.println(accountRequestDto.getIsCurrent());
         if (accountRequestDto.getIsCurrent().isEmpty()) {
-            accountEntity.setIsCurrent("3");
+            accountEntity.setIsCurrent(String.valueOf(AccountCode.NORMAL));
         } else {
             accountEntity.setIsCurrent(accountRequestDto.getIsCurrent());
         }
@@ -107,6 +180,33 @@ public class AccountServiceImpl implements AccountService {
         AccountCategoryEntity category = accountCategoryRepo.findById(accountRequestDto.getCatId())
                 .orElseThrow(() -> new RuntimeException("Category not found with id: " + accountRequestDto.getCatId()));
         accountEntity.setAccountCategory(category);
+        return accountEntity;
+    }
+
+    private AccountEntity dtoCastToEntitySupCus(AccountRequestDto accountRequestDto){
+        AccountEntity accountEntity= new AccountEntity();
+        String catCode=accountRequestDto.getCatCode();
+        accountEntity.setCatCode(catCode);
+        //customer=11 supplier=22
+        if (catCode.equals(AccountCode.CUSTOMER)){
+            accountEntity.setAccNo(generateAccountNumber(catCode));
+        }
+        if (catCode.equals(AccountCode.SUPPLIER)) {
+            accountEntity.setAccNo(generateAccountNumber(catCode));
+        }
+
+        accountEntity.setName(accountRequestDto.getName());
+        accountEntity.setDescription(accountRequestDto.getDescription());
+
+        if (accountRequestDto.getIsCurrent().isEmpty()) {
+            accountEntity.setIsCurrent(String.valueOf(AccountCode.NORMAL));
+        } else {
+            accountEntity.setIsCurrent(accountRequestDto.getIsCurrent());
+        }
+        accountEntity.setCreatedBy(accountRequestDto.getCreatedBy());
+        accountEntity.setUpdatedBy(accountRequestDto.getUpdatedBy());
+        accountEntity.setCommonStatus(CommonStatus.ACTIVE);
+
         return accountEntity;
     }
 
@@ -196,4 +296,7 @@ public class AccountServiceImpl implements AccountService {
             return PREFIX + String.format("%04d", timestamp);
         }
     }
+
+
+
 }

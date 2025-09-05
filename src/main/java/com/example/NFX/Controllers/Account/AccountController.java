@@ -22,8 +22,24 @@ public class AccountController {
         return accountService.create(accountRequestDto);
     }
 
+    // Create Supplier or Customer
+    @PostMapping("create-sup-cus")
+    public CommonResponse createSupCusAccount(@RequestBody AccountRequestDto accountRequestDto){
+        return accountService.createSupCus(accountRequestDto);
+    }
+
     @GetMapping("all")
     public CommonResponse getAllAccount(){
         return accountService.getAll();
+    }
+
+    @GetMapping("all-cus")
+    public CommonResponse getAllCusAccount(){
+        return accountService.getCus();
+    }
+
+    @GetMapping("all-sup")
+    public CommonResponse getAllSupAccount(){
+        return accountService.getSup();
     }
 }
